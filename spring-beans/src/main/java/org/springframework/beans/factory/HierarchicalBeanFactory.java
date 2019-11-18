@@ -31,6 +31,11 @@ import org.springframework.lang.Nullable;
  * @since 07.07.2003
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setParentBeanFactory
  */
+/**
+ * JOIN 使容器具备层级关系，如获取上级容器【haie'ra:kikl】
+ * @author Administrator
+ *
+ */
 public interface HierarchicalBeanFactory extends BeanFactory {
 
 	/**

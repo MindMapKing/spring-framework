@@ -55,6 +55,11 @@ import org.springframework.lang.Nullable;
  * @see HierarchicalBeanFactory
  * @see BeanFactoryUtils
  */
+/**
+ * JOIN 使容器具备列表的能力，通过类型等获取符合条件的bean数组
+ * @author Administrator
+ *
+ */
 public interface ListableBeanFactory extends BeanFactory {
 
 	/**

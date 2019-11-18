@@ -113,6 +113,10 @@ import org.springframework.lang.Nullable;
  * @see DisposableBean#destroy
  * @see org.springframework.beans.factory.support.RootBeanDefinition#getDestroyMethodName
  */
+/**
+ * JOIN BeanFactory 定义了IOC容器的标准/控制反转（Inversion of Control）
+ *
+ */
 public interface BeanFactory {
 
 	/**

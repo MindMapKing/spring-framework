@@ -59,6 +59,11 @@ import org.springframework.lang.Nullable;
  * @see org.springframework.beans.factory.config.ConfigurableListableBeanFactory
  * @see org.springframework.context.ApplicationContext#getAutowireCapableBeanFactory()
  */
+/**
+ * JOIN 为容器提供自动装载对象的功能
+ * @author Administrator
+ *
+ */
 public interface AutowireCapableBeanFactory extends BeanFactory {
 
 	/**
