@@ -294,7 +294,11 @@ configure(allprojects) { project ->
 			cacheChangingModulesFor 0, "seconds"
 		}
 		repositories {
-			mavenCentral()
+			// 设置本地maven仓库调用，这样，本地仓库没有才去下载
+			mavenLocal()
+			// 设置国内镜像，提高下载速度
+			maven{ url 'http://maven.aliyun.com/nexus/content/groups/public/' }
+			// 保留原来的仓库路径，国内没有则选择国外
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
 		}
 	}
