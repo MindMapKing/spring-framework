@@ -19,6 +19,7 @@ package org.springframework.beans.factory;
 import org.springframework.lang.Nullable;
 
 /**
+ * ä½¿å®¹å™¨å…·å¤‡å±‚çº§å…³ç³»ï¼Œå¦‚è·å–ä¸Šçº§å®¹å™¨
  * Sub-interface implemented by bean factories that can be part
  * of a hierarchy.
  *
@@ -30,11 +31,6 @@ import org.springframework.lang.Nullable;
  * @author Juergen Hoeller
  * @since 07.07.2003
  * @see org.springframework.beans.factory.config.ConfigurableBeanFactory#setParentBeanFactory
- */
-/**
- * JOIN Ê¹ÈİÆ÷¾ß±¸²ã¼¶¹ØÏµ£¬Èç»ñÈ¡ÉÏ¼¶ÈİÆ÷¡¾haie'ra:kikl¡¿
- * @author Administrator
- *
  */
 public interface HierarchicalBeanFactory extends BeanFactory {
 

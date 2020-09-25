@@ -116,6 +116,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	ClassLoader getTempClassLoader();
 
 	/**
+	 * 设置、是否缓存元数据，如果false，那么每次请求实例，都会从类加载器重新加载（热加载）
+	 * 
 	 * Set whether to cache bean metadata such as given bean definitions
 	 * (in merged fashion) and resolved bean classes. Default is on.
 	 * <p>Turn this flag off to enable hot-refreshing of bean definition objects
@@ -131,6 +133,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	boolean isCacheBeanMetadata();
 
 	/**
+	 * 1、定义用于解析bean definition的表达式解析器
+	 * 2、Bean表达式分解器
+	 *
 	 * Specify the resolution strategy for expressions in bean definition values.
 	 * <p>There is no expression support active in a BeanFactory by default.
 	 * An ApplicationContext will typically set a standard expression strategy
@@ -147,6 +152,10 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	BeanExpressionResolver getBeanExpressionResolver();
 
 	/**
+	 * 类型转化器，进行数据类型转换
+	 * 1、如 数组转列表
+	 * 2、多用在springmvc json字符串到对象属性的转换
+	 *
 	 * Specify a Spring 3.0 ConversionService to use for converting
 	 * property values, as an alternative to JavaBeans PropertyEditors.
 	 * @since 3.0
@@ -161,6 +170,11 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	ConversionService getConversionService();
 
 	/**
+	 * 1、设置属性注册器（一个注册中可以注册多个属性解析器）
+	 * 2、处理值到属性的转换，如日期字符串“2022年09月25日”，转为Date类型的具体操作
+	 * 3、多用于向spring中注册bean时，如xml中的日期字符串转java.util.Date类型
+	 * 4、主要用作字符串转其他类型
+	 *
 	 * Add a PropertyEditorRegistrar to be applied to all bean creation processes.
 	 * <p>Such a registrar creates new PropertyEditor instances and registers them
 	 * on the given registry, fresh for each bean creation attempt. This avoids
@@ -171,6 +185,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void addPropertyEditorRegistrar(PropertyEditorRegistrar registrar);
 
 	/**
+	 * 为特定类型注册一个属性解析器
+	 *
 	 * Register the given custom property editor for all properties of the
 	 * given type. To be invoked during factory configuration.
 	 * <p>Note that this method will register a shared custom editor instance;
@@ -183,6 +199,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void registerCustomEditor(Class<?> requiredType, Class<? extends PropertyEditor> propertyEditorClass);
 
 	/**
+	 * 将当前属性注册器中的属性解析器全部注册到指定注册中心里（copay)
 	 * Initialize the given PropertyEditorRegistry with the custom editors
 	 * that have been registered with this BeanFactory.
 	 * @param registry the PropertyEditorRegistry to initialize
@@ -190,6 +207,9 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	void copyRegisteredEditorsTo(PropertyEditorRegistry registry);
 
 	/**
+	 * 1、用于对象之间的转换
+	 * 2、他的执行通常基于PropertyEditor（转换内部属性），但不是必须
+	 *
 	 * Set a custom type converter that this BeanFactory should use for converting
 	 * bean property values, constructor argument values, etc.
 	 * <p>This will override the default PropertyEditor mechanism and hence make
@@ -210,6 +230,7 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	TypeConverter getTypeConverter();
 
 	/**
+	 * 属性绑定时的解析器，如对${value}进行解析
 	 * Add a String resolver for embedded values such as annotation attributes.
 	 * @param valueResolver the String resolver to apply to embedded values
 	 * @since 3.0
@@ -250,6 +271,8 @@ public interface ConfigurableBeanFactory extends HierarchicalBeanFactory, Single
 	int getBeanPostProcessorCount();
 
 	/**
+	 * 注册一个作用域，如请求、会话级别
+	 *
 	 * Register the given scope, backed by the given Scope implementation.
 	 * @param scopeName the scope identifier
 	 * @param scope the backing Scope implementation
