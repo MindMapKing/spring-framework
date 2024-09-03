@@ -1,30 +1,54 @@
 plugins {
+	// 用于管理Spring项目的依赖项版本，确保整个项目中使用的Spring框架和其他相关依赖项的版本是一致的。
+	// apply false 表示不应用该插件，而是将其作为依赖项添加到构建脚本中。
 	id 'io.spring.dependency-management' version '1.0.9.RELEASE' apply false
+	// Spring的GE约定插件,包含了一系列针对Spring项目的构建约定或配置，用于简化构建过程。
 	id 'io.spring.ge.conventions' version '0.0.7'
+	// 用于防止项目直接依赖某些HTTP客户端库，可能是出于安全或一致性的考虑
 	id 'io.spring.nohttp' version '0.0.5.RELEASE'
+	// 面向切面编程（AOP）的框架，该插件可能用于配置AspectJ的编译和织入过程
 	id "io.freefair.aspectj" version '4.1.6' apply false
+	// 用于生成Kotlin项目的文档，但不会立即应用到项目中
 	id 'org.jetbrains.dokka' version '0.10.1' apply false
+	// Kotlin JVM插件
 	id 'org.jetbrains.kotlin.jvm' version '1.3.72' apply false
+	// 将Asciidoctor文档转换为HTML和其他格式，以及生成PDF文件。它们可能用于项目文档的生成
 	id 'org.asciidoctor.jvm.convert' version '2.4.0'
 	id 'org.asciidoctor.jvm.pdf' version '2.4.0'
+	// 用于检查项目依赖项是否有可用的更新版本，以及管理项目的依赖项版本
 	id "com.github.ben-manes.versions" version '0.28.0'
+	// 用于生成Gradle构建的详细报告，这些报告可以在Gradle Build Scans网站上查看，以帮助分析和优化构建过程
 	id 'com.gradle.build-scan' version '3.2'
+	// 用于下载文件，包括从远程服务器下载文件，并将其保存到本地文件系统。
 	id 'de.undercouch.download' version '4.1.1'
 }
 
+// Gradle从指定的路径（项目根目录下的gradle/build-scan-user-data.gradle文件）应用另一个构建脚本。
+// 这通常用于分离复杂的构建逻辑，使其更易于管理和理解
 apply from: "$rootDir/gradle/build-scan-user-data.gradle"
+
+// 用于定义额外的属性或配置，这些属性或配置可以在构建脚本的其他部分被访问和使用。
 ext {
+	// 定义了一个名为moduleProjects的属性，它是一个集合，包含了所有名称以spring-开头的子项目
 	moduleProjects = subprojects.findAll { it.name.startsWith("spring-") }
+	// 定义了一个名为javaProjects的属性，它是一个集合，包含了除了名为:framework-bom的项目之外的所有子项目
 	javaProjects = subprojects - project(":framework-bom")
+
+	// 定义了一个名为withoutJclOverSlf4j的配置，
+	// 它指定了在依赖解析过程中应该排除的特定依赖项（在这里是org.slf4j的jcl-over-slf4j）
 	withoutJclOverSlf4j = {
 		exclude group: "org.slf4j", name: "jcl-over-slf4j"
 	}
 }
 
+/*
+	未所有项目添加的依赖项管理配置
+*/
 configure(allprojects) { project ->
 	apply plugin: "io.spring.dependency-management"
 
 	dependencyManagement {
+		// 类似于maven中引入pom依赖组模块
 		imports {
 			mavenBom "com.fasterxml.jackson:jackson-bom:2.10.5"
 			mavenBom "io.netty:netty-bom:4.1.51.Final"
@@ -36,6 +60,7 @@ configure(allprojects) { project ->
 			mavenBom "org.junit:junit-bom:5.6.3"
 		}
 		dependencies {
+			// 引用了同一group下的多个包的写法
 			dependencySet(group: 'org.apache.logging.log4j', version: '2.16.0') {
 				entry 'log4j-api'
 				entry 'log4j-core'
@@ -96,6 +121,7 @@ configure(allprojects) { project ->
 			dependencySet(group: 'org.apache.activemq', version: '5.8.0') {
 				entry 'activemq-broker'
 				entry('activemq-kahadb-store') {
+					// 排除特定功能
 					exclude group: "org.springframework", name: "spring-context"
 				}
 				entry 'activemq-stomp'
@@ -270,25 +296,46 @@ configure(allprojects) { project ->
 			dependency "org.glassfish.main:javax.jws:4.0-b33"
 			dependency "org.glassfish.tyrus:tyrus-container-servlet:1.13.1"
 		}
+		// 设置生成的POM文件自定义功能为禁用状态，即不会对生成的POM文件进行任何自定义修改
 		generatedPomCustomization {
 			enabled = false
 		}
+
+		/*
+			置依赖解析策略，将变动模块的缓存时间设为0秒，意味着每次构建时都不缓存变动的模块，以确保获取到最新的依赖版本
+		*/
 		resolutionStrategy {
 			cacheChangingModulesFor 0, "seconds"
 		}
+
+		// 为所有子模块配置仓库
 		repositories {
+			mavenLocal()
 			mavenCentral()
 			maven { url "https://repo.spring.io/libs-spring-framework-build" }
 		}
 	}
+
+	/*
+	  常见的配置包括compileClasspath、runtimeClasspath、testCompileClasspath、testRuntimeClasspath等，
+	  这些配置分别对应项目的不同构建和测试阶段所需的依赖项集合
+	*/
 	configurations.all {
 		resolutionStrategy {
+			// 这行代码表示不缓存任何标记为“changing”的模块,通常，
+			// 这类模块的每次构建都会生成新的内容（例如，SNAPSHOT版本的Maven依赖项）
 			cacheChangingModulesFor 0, "seconds"
+			// 针对动态版本的模块。动态版本是指版本号中包含通配符的版本，例如“1.0.+”。
+			// 通过设置缓存时间为0秒，你告诉Gradle不要缓存这些动态版本的模块，而是每次都去检查是否有更新的版本可用
 			cacheDynamicVersionsFor 0, "seconds"
 		}
 	}
 }
 
+/*
+	1、javaProjects是一个变量，表示：除了名为:framework-bom的项目之外的所有子项目
+	2、onfigure([rootProject] + javaProjects) 这种写法用于针对特定项目设置
+*/
 configure([rootProject] + javaProjects) { project ->
 	group = "org.springframework"
 
@@ -299,6 +346,7 @@ configure([rootProject] + javaProjects) { project ->
 	apply from: "${rootDir}/gradle/custom-java-home.gradle"
 	apply from: "${rootDir}/gradle/ide.gradle"
 
+	// 在确认Kotlin插件已被应用的情况下，进一步配置Kotlin编译器和相关插件
 	pluginManager.withPlugin("kotlin") {
 		apply plugin: "org.jetbrains.dokka"
 		compileKotlin {
@@ -316,6 +364,7 @@ configure([rootProject] + javaProjects) { project ->
 		}
 	}
 
+	// 设置测试任务
 	test {
 		useJUnitPlatform()
 		include(["**/*Tests.class", "**/*Test.class"])
@@ -348,6 +397,7 @@ configure([rootProject] + javaProjects) { project ->
 		checkstyle("io.spring.javaformat:spring-javaformat-checkstyle:0.0.15")
 	}
 
+	// 设置的javadoc生产的文档中外联的文档路径
 	ext.javadocLinks = [
 			"https://docs.oracle.com/javase/8/docs/api/",
 			"https://docs.oracle.com/javaee/7/api/",
@@ -370,6 +420,9 @@ configure([rootProject] + javaProjects) { project ->
 	] as String[]
 }
 
+/*
+   1、moduleProjects是指所有名称以spring-开头的子项目
+*/
 configure(moduleProjects) { project ->
 	apply from: "${rootDir}/gradle/spring-module.gradle"
 }
