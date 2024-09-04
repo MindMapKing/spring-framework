@@ -356,6 +356,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	// Handler method lookup
 
 	/**
+	 * <p>
+	 *     根据请求路径找到一个最匹配的controller的处理方法
+	 * </p>
 	 * Look up a handler method for the given request.
 	 */
 	@Override
@@ -374,6 +377,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 	}
 
 	/**
+	 * <p>
+	 *     从多个controller的方法中匹配出一个
+	 * </p>
 	 * Look up the best-matching handler method for the current request.
 	 * If multiple matches are found, the best match is selected.
 	 * @param lookupPath mapping lookup path within the current servlet mapping
@@ -389,6 +395,8 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		if (directPathMatches != null) {
 			addMatchingMappings(directPathMatches, matches, request);
 		}
+
+		// 若通过path未找到，则遍历所有mapping（就是controller)
 		if (matches.isEmpty()) {
 			// No choice but to go through all mappings...
 			addMatchingMappings(this.mappingRegistry.getMappings().keySet(), matches, request);
@@ -397,6 +405,9 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		if (!matches.isEmpty()) {
 			Match bestMatch = matches.get(0);
 			if (matches.size() > 1) {
+				/**
+				 * 对处理方法进行排序，选择最佳匹配；若存在两个则抛出异常
+				 */
 				Comparator<Match> comparator = new MatchComparator(getMappingComparator(request));
 				matches.sort(comparator);
 				bestMatch = matches.get(0);
@@ -424,6 +435,14 @@ public abstract class AbstractHandlerMethodMapping<T> extends AbstractHandlerMap
 		}
 	}
 
+	/**
+	 * <p>
+	 *     过滤最匹配的映射，将匹配的映射添加到matches中
+	 * </p>
+	 * @param mappings
+	 * @param matches
+	 * @param request
+	 */
 	private void addMatchingMappings(Collection<T> mappings, List<Match> matches, HttpServletRequest request) {
 		for (T mapping : mappings) {
 			T match = getMatchingMapping(mapping, request);

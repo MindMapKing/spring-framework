@@ -40,6 +40,9 @@ import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandl
 import org.springframework.web.util.UrlPathHelper;
 
 /**
+ * <p>
+ *     1、对应一个controller处理方法
+ * </p>
  * Request mapping information. Encapsulates the following request mapping conditions:
  * <ol>
  * <li>{@link PatternsRequestCondition}
@@ -230,6 +233,9 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 	}
 
 	/**
+	 * <p>
+	 *     1、依次检查方法、参数、头部、消费类型、生产类型、路径和自定义条件是否匹配，任意条件不满足则返回null
+	 * </p>
 	 * Checks if all conditions in this request mapping info match the provided request and returns
 	 * a potentially new request mapping info with conditions tailored to the current request.
 	 * <p>For example the returned instance may contain the subset of URL patterns that match to
@@ -247,14 +253,17 @@ public final class RequestMappingInfo implements RequestCondition<RequestMapping
 		if (params == null) {
 			return null;
 		}
+		// 匹配请求中的头部参数
 		HeadersRequestCondition headers = this.headersCondition.getMatchingCondition(request);
 		if (headers == null) {
 			return null;
 		}
+		// 匹配请求中的Content-Type: application/json
 		ConsumesRequestCondition consumes = this.consumesCondition.getMatchingCondition(request);
 		if (consumes == null) {
 			return null;
 		}
+		// 匹配请求中的Accept: application/json
 		ProducesRequestCondition produces = this.producesCondition.getMatchingCondition(request);
 		if (produces == null) {
 			return null;

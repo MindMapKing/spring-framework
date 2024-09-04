@@ -150,6 +150,9 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	}
 
 	/**
+	 * <p>
+	 *     使用HttpMessageConverter和 GenericHttpMessageConverter实现来解析入参，此处使用MappingJackson2HttpMessageConverter
+	 * </p>
 	 * Create the method argument value of the expected parameter type by reading
 	 * from the given HttpInputMessage.
 	 * @param <T> the expected type of the argument value to be created
@@ -166,6 +169,9 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	protected <T> Object readWithMessageConverters(HttpInputMessage inputMessage, MethodParameter parameter,
 			Type targetType) throws IOException, HttpMediaTypeNotSupportedException, HttpMessageNotReadableException {
 
+		/**
+		 * 获取contentType为null时，设置contentType为MediaType.APPLICATION_OCTET_STREAM
+		 */
 		MediaType contentType;
 		boolean noContentType = false;
 		try {
@@ -179,6 +185,9 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			contentType = MediaType.APPLICATION_OCTET_STREAM;
 		}
 
+		/**
+		 * 获得参数所在的controller和参数的类型
+		 */
 		Class<?> contextClass = parameter.getContainingClass();
 		Class<T> targetClass = (targetType instanceof Class ? (Class<T>) targetType : null);
 		if (targetClass == null) {
@@ -186,9 +195,18 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			targetClass = (Class<T>) resolvableType.resolve();
 		}
 
-		HttpMethod httpMethod = (inputMessage instanceof HttpRequest ? ((HttpRequest) inputMessage).getMethod() : null);
+		HttpMethod httpMethod = (inputMessage instanceof HttpRequest
+				? ((HttpRequest) inputMessage).getMethod() : null);
 		Object body = NO_VALUE;
 
+
+		/**
+		 * 使用HttpMessageConverter和 GenericHttpMessageConverter实现来解析入参，此处使用MappingJackson2HttpMessageConverter
+		 * 1. HttpMessageConverter主要支持比较简单的类型的解析，如String，Map，List，Object等，
+		 * 但GenericHttpMessageConverter支持更复杂的类型，如Map<String, Object>，List<Map<String, Object>>等
+		 * 2、GenericHttpMessageConverter的引用还有就是历史原因，在Spring 4.0之前，Spring MVC只支持HttpMessageConverter,
+		 *
+		 */
 		EmptyBodyCheckingHttpInputMessage message;
 		try {
 			message = new EmptyBodyCheckingHttpInputMessage(inputMessage);
@@ -196,14 +214,21 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
 				Class<HttpMessageConverter<?>> converterType = (Class<HttpMessageConverter<?>>) converter.getClass();
 				GenericHttpMessageConverter<?> genericConverter =
-						(converter instanceof GenericHttpMessageConverter ? (GenericHttpMessageConverter<?>) converter : null);
-				if (genericConverter != null ? genericConverter.canRead(targetType, contextClass, contentType) :
-						(targetClass != null && converter.canRead(targetClass, contentType))) {
+						(converter instanceof GenericHttpMessageConverter
+								? (GenericHttpMessageConverter<?>) converter : null);
+
+				if (genericConverter != null
+						? genericConverter.canRead(targetType, contextClass, contentType)
+						: (targetClass != null && converter.canRead(targetClass, contentType))) {
 					if (message.hasBody()) {
+						/**
+						 * 入参解析前后，在getAdvice()中支持切面在操作前后添加额外处理
+						 */
 						HttpInputMessage msgToUse =
 								getAdvice().beforeBodyRead(message, parameter, targetType, converterType);
-						body = (genericConverter != null ? genericConverter.read(targetType, contextClass, msgToUse) :
-								((HttpMessageConverter<T>) converter).read(targetClass, msgToUse));
+						body = (genericConverter != null
+								? genericConverter.read(targetType, contextClass, msgToUse)
+								: ((HttpMessageConverter<T>) converter).read(targetClass, msgToUse));
 						body = getAdvice().afterBodyRead(body, msgToUse, parameter, targetType, converterType);
 					}
 					else {
@@ -284,6 +309,9 @@ public abstract class AbstractMessageConverterMethodArgumentResolver implements 
 	}
 
 	/**
+	 * <p>
+	 *     特殊处理Optional类型
+	 * </p>
 	 * Adapt the given argument against the method parameter, if necessary.
 	 * @param arg the resolved argument
 	 * @param parameter the method parameter descriptor

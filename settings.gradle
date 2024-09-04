@@ -7,6 +7,9 @@ pluginManagement {
 }
 apply from: "$rootDir/gradle/build-cache-settings.gradle"
 
+/*
+	指定项目包含的模块
+* */
 include "spring-aop"
 include "spring-aspects"
 include "spring-beans"

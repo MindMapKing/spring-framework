@@ -393,7 +393,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 	@Override
 	@Nullable
 	public final HandlerExecutionChain getHandler(HttpServletRequest request) throws Exception {
+		// 匹配一个最佳的controller的处理方法对象，HandlerMethod
 		Object handler = getHandlerInternal(request);
+
 		if (handler == null) {
 			handler = getDefaultHandler();
 		}
@@ -406,6 +408,9 @@ public abstract class AbstractHandlerMapping extends WebApplicationObjectSupport
 			handler = obtainApplicationContext().getBean(handlerName);
 		}
 
+		/**
+		 * HandlerExecutionChain中包含匹配的controller的处理方法对象和拦截器链
+		 */
 		HandlerExecutionChain executionChain = getHandlerExecutionChain(handler, request);
 
 		if (logger.isTraceEnabled()) {
