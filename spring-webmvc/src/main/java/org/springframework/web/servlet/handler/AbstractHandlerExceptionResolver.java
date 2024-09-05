@@ -137,6 +137,7 @@ public abstract class AbstractHandlerExceptionResolver implements HandlerExcepti
 	public ModelAndView resolveException(
 			HttpServletRequest request, HttpServletResponse response, @Nullable Object handler, Exception ex) {
 
+		// 校验释放可以处理
 		if (shouldApplyTo(request, handler)) {
 			prepareResponse(ex, response);
 			ModelAndView result = doResolveException(request, response, handler, ex);

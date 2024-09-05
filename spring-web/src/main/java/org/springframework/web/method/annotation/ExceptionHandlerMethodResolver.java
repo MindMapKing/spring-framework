@@ -44,24 +44,33 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class ExceptionHandlerMethodResolver {
 
 	/**
+	 * 定义异常处理器方法解析器
 	 * A filter for selecting {@code @ExceptionHandler} methods.
 	 */
 	public static final MethodFilter EXCEPTION_HANDLER_METHODS = method ->
 			AnnotatedElementUtils.hasAnnotation(method, ExceptionHandler.class);
 
 
+	/**
+	 * 异常类型->异常处理方法
+	 */
 	private final Map<Class<? extends Throwable>, Method> mappedMethods = new HashMap<>(16);
 
 	private final Map<Class<? extends Throwable>, Method> exceptionLookupCache = new ConcurrentReferenceHashMap<>(16);
 
 
 	/**
+	 * <p>
+	 *     解析列中所有异常处理方法，构造异常类型到异常处理方法的映射
+	 * </p>
 	 * A constructor that finds {@link ExceptionHandler} methods in the given type.
 	 * @param handlerType the type to introspect
 	 */
 	public ExceptionHandlerMethodResolver(Class<?> handlerType) {
+		// @ExceptionHandler 查询类中的标注该注解的方法
 		for (Method method : MethodIntrospector.selectMethods(handlerType, EXCEPTION_HANDLER_METHODS)) {
 			for (Class<? extends Throwable> exceptionType : detectExceptionMappings(method)) {
+				// 将异常类型和异常处理器方法添加到mappedMethods中
 				addExceptionMapping(exceptionType, method);
 			}
 		}
@@ -69,6 +78,9 @@ public class ExceptionHandlerMethodResolver {
 
 
 	/**
+	 * <p>
+	 *     解析方法支持的异常类型并返回
+	 * </p>
 	 * Extract exception mappings from the {@code @ExceptionHandler} annotation first,
 	 * and then as a fallback from the method signature itself.
 	 */
@@ -89,6 +101,11 @@ public class ExceptionHandlerMethodResolver {
 		return result;
 	}
 
+	/**
+	 * 将@ExceptionHandler注解中的异常类型添加到result中
+	 * @param method
+	 * @param result
+	 */
 	private void detectAnnotationExceptionMappings(Method method, List<Class<? extends Throwable>> result) {
 		ExceptionHandler ann = AnnotatedElementUtils.findMergedAnnotation(method, ExceptionHandler.class);
 		Assert.state(ann != null, "No ExceptionHandler annotation");
@@ -97,6 +114,7 @@ public class ExceptionHandlerMethodResolver {
 
 	private void addExceptionMapping(Class<? extends Throwable> exceptionType, Method method) {
 		Method oldMethod = this.mappedMethods.put(exceptionType, method);
+		// 校验一个异常类型只能对应一个方法
 		if (oldMethod != null && !oldMethod.equals(method)) {
 			throw new IllegalStateException("Ambiguous @ExceptionHandler method mapped for [" +
 					exceptionType + "]: {" + oldMethod + ", " + method + "}");
@@ -104,6 +122,9 @@ public class ExceptionHandlerMethodResolver {
 	}
 
 	/**
+	 * <p>
+	 *     有标注@ExceptionHandler的方法
+	 * </p>
 	 * Whether the contained type has any exception mappings.
 	 */
 	public boolean hasExceptionMappings() {

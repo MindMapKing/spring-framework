@@ -250,6 +250,9 @@ public class ControllerAdviceBean implements Ordered {
 
 
 	/**
+	 * <p>
+	 *     查询@ControllerAdvice注解标注的类，并封装成ControllerAdviceBean
+	 * </p>
 	 * Find beans annotated with {@link ControllerAdvice @ControllerAdvice} in the
 	 * given {@link ApplicationContext} and wrap them as {@code ControllerAdviceBean}
 	 * instances.
