@@ -172,6 +172,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 		Class<?> valueType;
 		Type targetType;
 
+		/**
+		 * 获取入参和目标对象的类型
+		 * */
 		if (value instanceof CharSequence) {
 			body = value.toString();
 			valueType = String.class;
@@ -202,6 +205,9 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 
+		/**
+		 * 获取contentType的媒体类型
+		 */
 		MediaType selectedMediaType = null;
 		MediaType contentType = outputMessage.getHeaders().getContentType();
 		boolean isContentTypePreset = contentType != null && contentType.isConcrete();
@@ -257,14 +263,21 @@ public abstract class AbstractMessageConverterMethodProcessor extends AbstractMe
 			}
 		}
 
+
+		/**
+		 * 根据计算出的selectedMediaType，获取对应的HttpMessageConverter
+		 * 1、针对HttpMessageConverter和 GenericHttpMessageConverter的继承类逐个尝试
+		 * 2、此处的处理同入参解析时，都使用getAdvice()进行类似切面的处理
+		 */
 		if (selectedMediaType != null) {
 			selectedMediaType = selectedMediaType.removeQualityValue();
 			for (HttpMessageConverter<?> converter : this.messageConverters) {
 				GenericHttpMessageConverter genericConverter = (converter instanceof GenericHttpMessageConverter ?
 						(GenericHttpMessageConverter<?>) converter : null);
 				if (genericConverter != null ?
-						((GenericHttpMessageConverter) converter).canWrite(targetType, valueType, selectedMediaType) :
-						converter.canWrite(valueType, selectedMediaType)) {
+						((GenericHttpMessageConverter) converter).canWrite(targetType, valueType, selectedMediaType)
+						: converter.canWrite(valueType, selectedMediaType)) {
+
 					body = getAdvice().beforeBodyWrite(body, returnType, selectedMediaType,
 							(Class<? extends HttpMessageConverter<?>>) converter.getClass(),
 							inputMessage, outputMessage);

@@ -1078,6 +1078,11 @@ public class DispatcherServlet extends FrameworkServlet {
 				// making them available for @ExceptionHandler methods and other scenarios.
 				dispatchException = new NestedServletException("Handler dispatch failed", err);
 			}
+
+			/**
+			 * 方法调用异常情况的处理
+			 * 1、此方法中也会处理拦截器的triggerAfterCompletion方法
+			 */
 			processDispatchResult(processedRequest, response, mappedHandler, mv, dispatchException);
 		}
 		catch (Exception ex) {
@@ -1140,6 +1145,10 @@ public class DispatcherServlet extends FrameworkServlet {
 				mv = ((ModelAndViewDefiningException) exception).getModelAndView();
 			}
 			else {
+				/**
+				 * 此处处理异常情况
+				 * 1、此处的handler是HandlerMethod（匹配的controller中的处理方法)
+				 */
 				Object handler = (mappedHandler != null ? mappedHandler.getHandler() : null);
 				mv = processHandlerException(request, response, handler, exception);
 				errorView = (mv != null);

@@ -74,7 +74,7 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 	@Override
 	public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
 			ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
-
+		// 应该会找到RequestResponseBodyMethodProcessor
 		HandlerMethodReturnValueHandler handler = selectHandler(returnValue, returnType);
 		if (handler == null) {
 			throw new IllegalArgumentException("Unknown return value type: " + returnType.getParameterType().getName());
@@ -82,6 +82,14 @@ public class HandlerMethodReturnValueHandlerComposite implements HandlerMethodRe
 		handler.handleReturnValue(returnValue, returnType, mavContainer, webRequest);
 	}
 
+	/**
+	 * <p>
+	 *     应该会找到RequestResponseBodyMethodProcessor
+	 * </p>
+	 * @param value
+	 * @param returnType
+	 * @return
+	 */
 	@Nullable
 	private HandlerMethodReturnValueHandler selectHandler(@Nullable Object value, MethodParameter returnType) {
 		boolean isAsyncValue = isAsyncReturnValue(value, returnType);
