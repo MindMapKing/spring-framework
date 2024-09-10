@@ -51,8 +51,14 @@ import org.springframework.stereotype.Component;
  */
 abstract class ConfigurationClassUtils {
 
+	/**
+	 * 全配置类，直接使用@Configuration注解
+	 */
 	public static final String CONFIGURATION_CLASS_FULL = "full";
 
+	/**
+	 * 类似的配置类，需要进一步解析（有@Component等注解），没有直接使用@Configuration注解
+	 */
 	public static final String CONFIGURATION_CLASS_LITE = "lite";
 
 	public static final String CONFIGURATION_CLASS_ATTRIBUTE =
@@ -75,6 +81,9 @@ abstract class ConfigurationClassUtils {
 
 
 	/**
+	 * <p>
+	 *     判断是否是需要进一步解析的配置类
+	 * </p>
 	 * Check whether the given bean definition is a candidate for a configuration class
 	 * (or a nested component class declared within a configuration/component class,
 	 * to be auto-registered as well), and mark it accordingly.
@@ -143,6 +152,10 @@ abstract class ConfigurationClassUtils {
 	}
 
 	/**
+	 * <p>
+	 *     是否是一个需要进一步解析的类，如有@Component、@ComponentScan、@Import、@ImportResource或@Bean注解
+	 *     1、不是直接使用@Configuration
+	 * </p>
 	 * Check the given metadata for a configuration class candidate
 	 * (or nested component class declared within a configuration/component class).
 	 * @param metadata the metadata of the annotated class
