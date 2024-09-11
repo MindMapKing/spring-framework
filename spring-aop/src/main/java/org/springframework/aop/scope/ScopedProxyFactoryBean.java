@@ -33,6 +33,9 @@ import org.springframework.util.Assert;
 import org.springframework.util.ClassUtils;
 
 /**
+ * <p>
+ *     工厂bean,容器创建实例时调用getObject()方法返回代理对象
+ * </p>
  * Convenient proxy factory bean for scoped objects.
  *
  * <p>Proxies created using this factory bean are thread-safe singletons
@@ -106,6 +109,9 @@ public class ScopedProxyFactoryBean extends ProxyConfig
 			pf.setInterfaces(ClassUtils.getAllInterfacesForClass(beanType, cbf.getBeanClassLoader()));
 		}
 
+		/**
+		 * 此处的ScopedObject的作用用于方式@Bean被重复初始化，这里的策略是每次都从容器中获取下
+		 */
 		// Add an introduction that implements only the methods on ScopedObject.
 		ScopedObject scopedObject = new DefaultScopedObject(cbf, this.scopedTargetSource.getTargetBeanName());
 		pf.addAdvice(new DelegatingIntroductionInterceptor(scopedObject));

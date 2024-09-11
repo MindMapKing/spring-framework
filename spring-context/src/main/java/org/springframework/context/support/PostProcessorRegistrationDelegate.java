@@ -133,6 +133,9 @@ final class PostProcessorRegistrationDelegate {
 		}
 
 		else {
+			/**
+			 * 调用ConfigurationClassPostProcessor#postProcessBeanFactory方法
+			 */
 			// Invoke factory processors registered with the context instance.
 			invokeBeanFactoryPostProcessors(beanFactoryPostProcessors, beanFactory);
 		}

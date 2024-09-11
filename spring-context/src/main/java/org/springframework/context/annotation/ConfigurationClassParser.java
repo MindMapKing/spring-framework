@@ -191,6 +191,9 @@ class ConfigurationClassParser {
 			}
 		}
 
+		/**
+		 * 处理延迟导入的类
+		 */
 		this.deferredImportSelectorHandler.process();
 	}
 
@@ -330,6 +333,10 @@ class ConfigurationClassParser {
 			}
 		}
 
+
+		/**
+		 * 解析配置中的@Bean注解的方法，放到当前处理的配置类中，待外边处理
+		 */
 		// Process individual @Bean methods
 		Set<MethodMetadata> beanMethods = retrieveBeanMethodMetadata(sourceClass);
 		for (MethodMetadata methodMetadata : beanMethods) {
@@ -522,6 +529,9 @@ class ConfigurationClassParser {
 
 
 	/**
+	 * <p>
+	 *     收集有@Import注解的配置类
+	 * </p>
 	 * Returns {@code @Import} class, considering all meta-annotations.
 	 */
 	private Set<SourceClass> getImports(SourceClass sourceClass) throws IOException {
@@ -532,6 +542,9 @@ class ConfigurationClassParser {
 	}
 
 	/**
+	 * <p>
+	 *     遍历收集所有有@Import注解的配置类
+	 * </p>
 	 * Recursively collect all declared {@code @Import} values. Unlike most
 	 * meta-annotations it is valid to have several {@code @Import}s declared with
 	 * different values; the usual process of returning values from the first
@@ -558,6 +571,17 @@ class ConfigurationClassParser {
 		}
 	}
 
+	/**
+	 * <p>
+	 *     处理@Import注解引入的（value值）配置类
+	 *     1、@Import引入的的类
+	 * </p>
+	 * @param configClass
+	 * @param currentSourceClass
+	 * @param importCandidates
+	 * @param exclusionFilter
+	 * @param checkForCircularImports
+	 */
 	private void processImports(ConfigurationClass configClass, SourceClass currentSourceClass,
 			Collection<SourceClass> importCandidates, Predicate<String> exclusionFilter,
 			boolean checkForCircularImports) {
@@ -566,6 +590,7 @@ class ConfigurationClassParser {
 			return;
 		}
 
+		// 校验 import循环引用的类
 		if (checkForCircularImports && isChainedImportOnStack(configClass)) {
 			this.problemReporter.error(new CircularImportProblem(configClass, this.importStack));
 		}
@@ -573,6 +598,9 @@ class ConfigurationClassParser {
 			this.importStack.push(configClass);
 			try {
 				for (SourceClass candidate : importCandidates) {
+					/**
+					 * 引入类路径，由spring自动装配
+					 */
 					if (candidate.isAssignable(ImportSelector.class)) {
 						// Candidate class is an ImportSelector -> delegate to it to determine imports
 						Class<?> candidateClass = candidate.loadClass();
@@ -582,6 +610,10 @@ class ConfigurationClassParser {
 						if (selectorFilter != null) {
 							exclusionFilter = exclusionFilter.or(selectorFilter);
 						}
+
+						/**
+						 * 如果是需要最后引用的，先放到队列中，等待所有BeanDefinition装载后再执行
+						 */
 						if (selector instanceof DeferredImportSelector) {
 							this.deferredImportSelectorHandler.handle(configClass, (DeferredImportSelector) selector);
 						}
@@ -591,6 +623,9 @@ class ConfigurationClassParser {
 							processImports(configClass, currentSourceClass, importSourceClasses, exclusionFilter, false);
 						}
 					}
+					/**
+					 * 直接把容器注册器给用户，用户可以装载自定义的BeanDefinition
+					 */
 					else if (candidate.isAssignable(ImportBeanDefinitionRegistrar.class)) {
 						// Candidate class is an ImportBeanDefinitionRegistrar ->
 						// delegate to it to register additional bean definitions
@@ -601,6 +636,9 @@ class ConfigurationClassParser {
 						configClass.addImportBeanDefinitionRegistrar(registrar, currentSourceClass.getMetadata());
 					}
 					else {
+						/**
+						 * 此处引入的是配置类
+						 */
 						// Candidate class not an ImportSelector or ImportBeanDefinitionRegistrar ->
 						// process it as an @Configuration class
 						this.importStack.registerImport(

@@ -44,6 +44,9 @@ public abstract class ScopedProxyUtils {
 
 
 	/**
+	 * <p>
+	 *     解决重复创建的bean的问题
+	 * </p>
 	 * Generate a scoped proxy for the supplied target bean, registering the target
 	 * bean with an internal name and setting 'targetBeanName' on the scoped proxy.
 	 * @param definition the original bean definition
@@ -60,6 +63,9 @@ public abstract class ScopedProxyUtils {
 		BeanDefinition targetDefinition = definition.getBeanDefinition();
 		String targetBeanName = getTargetBeanName(originalBeanName);
 
+		/**
+		 * 此处使用ScopedProxyFactoryBean对@Bean方法进行了封装，避免了重复创建bean问题
+		 */
 		// Create a scoped proxy definition for the original bean name,
 		// "hiding" the target bean in an internal target definition.
 		RootBeanDefinition proxyDefinition = new RootBeanDefinition(ScopedProxyFactoryBean.class);

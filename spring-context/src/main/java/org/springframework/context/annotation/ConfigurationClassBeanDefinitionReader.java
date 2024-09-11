@@ -140,6 +140,7 @@ class ConfigurationClassBeanDefinitionReader {
 		if (configClass.isImported()) {
 			registerBeanDefinitionForImportedConfigurationClass(configClass);
 		}
+
 		for (BeanMethod beanMethod : configClass.getBeanMethods()) {
 			loadBeanDefinitionsForBeanMethod(beanMethod);
 		}
@@ -171,6 +172,9 @@ class ConfigurationClassBeanDefinitionReader {
 	}
 
 	/**
+	 * <p>
+	 *   @bean定义的方法在此处处理，特殊之处是为该注解方法创建了代理，避免重复创建bean的情况
+	 * </p>
 	 * Read the given {@link BeanMethod}, registering bean definitions
 	 * with the BeanDefinitionRegistry based on its contents.
 	 */
