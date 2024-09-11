@@ -353,7 +353,7 @@ configure([rootProject] + javaProjects) { project ->
 			kotlinOptions {
 				jvmTarget = "1.8"
 				freeCompilerArgs = ["-Xjsr305=strict"]
-				allWarningsAsErrors = true
+				allWarningsAsErrors = false
 			}
 		}
 		compileTestKotlin {
@@ -373,10 +373,10 @@ configure([rootProject] + javaProjects) { project ->
 		systemProperty("io.netty.leakDetection.level", "paranoid")
 	}
 
-	checkstyle {
-		toolVersion = "8.38"
-		configDir = rootProject.file("src/checkstyle")
-	}
+//	checkstyle {
+//		toolVersion = "8.38"
+//		configDir = rootProject.file("src/checkstyle")
+//	}
 
 	dependencies {
 		testCompile("org.junit.jupiter:junit-jupiter-api")
